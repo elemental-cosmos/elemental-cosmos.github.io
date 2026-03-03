@@ -202,7 +202,7 @@ function Stars({ count = 200, elements }) {
   }, [count, elements]);
 
   return (
-    <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 2 }}>
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 2 }}>
       {stars.map((s) => (
         <div key={s.id} style={{ position: "absolute", left: `${s.x}%`, top: `${s.y}%`, pointerEvents: "auto" }}>
           <div
@@ -307,7 +307,7 @@ export default function ElementalCosmos() {
   const handleSearchSelect=useCallback((el)=>{setSelected(el);setSearchQuery("");searchRef.current?.blur();},[]);
 
   return (
-    <div ref={wrapRef} style={{width:"100%",minHeight:"100vh",background:"radial-gradient(ellipse at 60% 50%,#0c0c22 0%,#060612 40%,#020208 100%)",backgroundAttachment:"fixed",fontFamily:"'JetBrains Mono',monospace",overflow:"auto",position:"relative",display:"flex",flexDirection:"column"}}>
+    <div ref={wrapRef} style={{width:"100%",minHeight:"100vh",background:"radial-gradient(ellipse at 60% 50%,#0c0c22 0%,#060612 40%,#020208 100%)",fontFamily:"'JetBrains Mono',monospace",overflow:"auto",position:"relative",display:"flex",flexDirection:"column"}}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
       <style>{`@keyframes panelIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}@keyframes twinkle{0%{opacity:0.1;transform:scale(1)}100%{opacity:0.8;transform:scale(1.3)}}html,body{margin:0;padding:0;overflow:auto;scroll-behavior:smooth}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:rgba(6,6,18,0.5)}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}`}</style>
 
