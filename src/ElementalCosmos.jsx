@@ -103,7 +103,7 @@ function DetailPanel({ el, onClose }) {
   );
   const Sec=({title,children})=>(<div style={{marginBottom:12}}><div style={{fontSize:7,color:"rgba(255,255,255,0.25)",letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:4,fontFamily:"'JetBrains Mono',monospace"}}>{title}</div>{children}</div>);
   return (
-    <div style={{position:"absolute",top:10,right:10,width:330,maxHeight:"calc(100vh - 20px)",overflowY:"auto",background:"rgba(8,8,22,0.97)",border:`1px solid ${ring.color}25`,borderRadius:14,zIndex:100,backdropFilter:"blur(20px)",boxShadow:`0 24px 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.04)`,animation:"panelIn 0.3s cubic-bezier(.4,0,.2,1)"}}>
+    <div style={{position:"fixed",top:10,right:10,width:330,maxHeight:"calc(100vh - 20px)",overflowY:"auto",background:"rgba(8,8,22,0.97)",border:`1px solid ${ring.color}25`,borderRadius:14,zIndex:100,backdropFilter:"blur(20px)",boxShadow:`0 24px 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.04)`,animation:"panelIn 0.3s cubic-bezier(.4,0,.2,1)"}}>
       <div style={{padding:"20px 18px 14px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
         <button onClick={onClose} style={{position:"absolute",top:14,right:14,background:"none",border:"none",color:"rgba(255,255,255,0.3)",fontSize:20,cursor:"pointer",lineHeight:1}}>×</button>
         <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:50,fontWeight:700,color:fam.color,lineHeight:1}}>{el.sym}</div>
@@ -138,7 +138,7 @@ function DetailPanel({ el, onClose }) {
 
 function Sidebar({ activeRing, onRingClick, open, onToggle }) {
   return (
-    <div style={{position:"absolute",left:0,top:0,bottom:0,width:open?320:44,background:"rgba(6,6,18,0.95)",borderRight:"1px solid rgba(255,255,255,0.06)",zIndex:80,transition:"width 0.4s cubic-bezier(.4,0,.2,1)",overflow:"hidden",backdropFilter:"blur(16px)",display:"flex",flexDirection:"column"}}>
+    <div style={{position:"fixed",left:0,top:0,bottom:0,width:open?320:44,background:"rgba(6,6,18,0.95)",borderRight:"1px solid rgba(255,255,255,0.06)",zIndex:80,transition:"width 0.4s cubic-bezier(.4,0,.2,1)",overflow:"hidden",backdropFilter:"blur(16px)",display:"flex",flexDirection:"column"}}>
       <button onClick={onToggle} style={{background:"none",border:"none",color:"rgba(255,255,255,0.5)",fontSize:18,cursor:"pointer",padding:"14px 12px",textAlign:"center",flexShrink:0,width:44,alignSelf:"flex-start",transition:"color 0.2s"}}>{open?"\u25C1":"\u25B7"}</button>
       {!open&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12,padding:"10px 0"}}>{RING_META.map((r,i)=>(<button key={r.id} onClick={()=>onRingClick(i)} title={r.name} style={{width:20,height:20,borderRadius:"50%",border:`2px solid ${r.color}`,background:activeRing===i?`${r.color}30`:"transparent",cursor:"pointer",transition:"all 0.2s",flexShrink:0}}/>))}</div>}
       {open&&<div style={{padding:"0 20px 20px",overflowY:"auto",flex:1}}>
@@ -165,31 +165,88 @@ function Sidebar({ activeRing, onRingClick, open, onToggle }) {
   );
 }
 
-function Stars({ count = 200 }) {
+function Stars({ count = 200, elements }) {
+  const [activeStar, setActiveStar] = useState(null);
   const stars = useMemo(() => {
+    const facts = (el) => {
+      const disc = el.discovered < 0 ? `~${Math.abs(el.discovered)} BCE` : el.discovered;
+      const pool = [
+        `State: ${el.state} at room temperature`,
+        `Boiling point: ${el.boil}\u00B0C`,
+        `Melting point: ${el.melt}\u00B0C`,
+        `Density: ${el.density} g/cm\u00B3`,
+        `Atomic mass: ${el.mass} u`,
+        `Group: ${el.group}`,
+        el.eneg !== null ? `Electronegativity: ${el.eneg}` : `Config: ${el.econfig}`,
+        `Discovered: ${disc}`,
+        `Discoverer: ${el.discoverer}`,
+        el.funfact,
+      ];
+      return pool[Math.floor(Math.random() * pool.length)];
+    };
     const s = [];
     for (let i = 0; i < count; i++) {
+      const el = elements[Math.floor(Math.random() * elements.length)];
       s.push({
+        id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
-        size: Math.random() * 1.8 + 0.3,
-        opacity: Math.random() * 0.6 + 0.1,
+        size: Math.random() * 3 + 1.5,
+        opacity: Math.random() * 0.5 + 0.35,
         delay: Math.random() * 5,
+        el,
+        fact: facts(el),
       });
     }
     return s;
-  }, [count]);
+  }, [count, elements]);
+
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
-      {stars.map((s, i) => (
-        <div key={i} style={{
-          position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
-          width: s.size, height: s.size, borderRadius: "50%",
-          background: s.opacity > 0.5 ? "rgba(255,255,255,0.9)" : "rgba(200,210,255,0.7)",
-          opacity: s.opacity,
-          animation: `twinkle ${3 + s.delay}s ease-in-out ${s.delay}s infinite alternate`,
-        }} />
+    <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 2 }}>
+      {stars.map((s) => (
+        <div key={s.id} style={{ position: "absolute", left: `${s.x}%`, top: `${s.y}%`, pointerEvents: "auto" }}>
+          <div
+            onClick={(e) => { e.stopPropagation(); setActiveStar(activeStar === s.id ? null : s.id); }}
+            style={{
+              width: 16, height: 16, borderRadius: "50%", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              position: "relative",
+            }}
+          >
+            <div style={{
+              width: s.size, height: s.size, borderRadius: "50%",
+              background: FAMILIES[s.el.family]?.color || "rgba(255,255,255,0.8)",
+              opacity: s.opacity,
+              boxShadow: `0 0 ${s.size + 3}px ${FAMILIES[s.el.family]?.color || "rgba(255,255,255,0.6)"}`,
+              animation: `twinkle ${3 + s.delay}s ease-in-out ${s.delay}s infinite alternate`,
+              transition: "transform 0.2s, opacity 0.2s",
+              transform: activeStar === s.id ? "scale(3)" : "scale(1)",
+            }} />
+          </div>
+          {activeStar === s.id && (
+            <div style={{
+              position: "absolute", top: -8, left: 12, whiteSpace: "nowrap", zIndex: 110,
+              background: "rgba(6,6,20,0.95)", border: `1px solid ${FAMILIES[s.el.family]?.color || "#fff"}40`,
+              borderRadius: 8, padding: "8px 12px", backdropFilter: "blur(12px)",
+              boxShadow: `0 8px 24px rgba(0,0,0,0.5)`, pointerEvents: "auto",
+              animation: "panelIn 0.2s ease-out",
+            }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                <span style={{
+                  fontFamily: "'Cormorant Garamond',serif", fontWeight: 700, fontSize: 16,
+                  color: FAMILIES[s.el.family]?.color || "#fff",
+                }}>{s.el.sym}</span>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>{s.el.name}</span>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono',monospace" }}>Z{s.el.z}</span>
+              </div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.55)", fontFamily: "'JetBrains Mono',monospace", maxWidth: 260, whiteSpace: "normal", lineHeight: 1.5 }}>{s.fact}</div>
+            </div>
+          )}
+        </div>
       ))}
+      {activeStar !== null && (
+        <div onClick={() => setActiveStar(null)} style={{ position: "fixed", inset: 0, zIndex: -1, pointerEvents: "auto" }} />
+      )}
     </div>
   );
 }
@@ -250,11 +307,9 @@ export default function ElementalCosmos() {
   const handleSearchSelect=useCallback((el)=>{setSelected(el);setSearchQuery("");searchRef.current?.blur();},[]);
 
   return (
-    <div ref={wrapRef} style={{width:"100%",height:"100vh",background:"radial-gradient(ellipse at 60% 50%,#0c0c22 0%,#060612 40%,#020208 100%)",fontFamily:"'JetBrains Mono',monospace",overflow:"hidden",position:"relative",display:"flex",flexDirection:"column"}}>
+    <div ref={wrapRef} style={{width:"100%",minHeight:"100vh",background:"radial-gradient(ellipse at 60% 50%,#0c0c22 0%,#060612 40%,#020208 100%)",backgroundAttachment:"fixed",fontFamily:"'JetBrains Mono',monospace",overflow:"auto",position:"relative",display:"flex",flexDirection:"column"}}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-      <style>{`@keyframes panelIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}@keyframes twinkle{0%{opacity:0.1;transform:scale(1)}100%{opacity:0.8;transform:scale(1.3)}}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}`}</style>
-
-      <Stars count={220} />
+      <style>{`@keyframes panelIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}@keyframes twinkle{0%{opacity:0.1;transform:scale(1)}100%{opacity:0.8;transform:scale(1.3)}}html,body{margin:0;padding:0;overflow:auto;scroll-behavior:smooth}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:rgba(6,6,18,0.5)}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}`}</style>
 
       <Sidebar activeRing={activeRing} onRingClick={handleRingClick} open={sidebarOpen} onToggle={()=>setSidebarOpen(p=>!p)}/>
 
@@ -283,7 +338,7 @@ export default function ElementalCosmos() {
           </div>
         </div>
 
-        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",minHeight:dims.h+40}}>
           <svg width={dims.w} height={dims.h} viewBox={`0 0 ${dims.w} ${dims.h}`}>
             <defs><radialGradient id="cG"><stop offset="0%" stopColor="rgba(244,211,94,0.1)"/><stop offset="100%" stopColor="rgba(244,211,94,0)"/></radialGradient></defs>
             <circle cx={cx} cy={cy} r={maxR*0.15} fill="url(#cG)"/>
@@ -303,7 +358,7 @@ export default function ElementalCosmos() {
           </svg>
 
           {hovered&&!selected&&(
-            <div style={{position:"absolute",bottom:14,left:"50%",transform:"translateX(-50%)",background:"rgba(8,8,22,0.96)",border:`1px solid ${RING_META[RINGS.findIndex(r=>r.some(e=>e.sym===hovered.sym))]?.color||"#fff"}30`,borderRadius:10,padding:"12px 20px",maxWidth:420,textAlign:"center",backdropFilter:"blur(14px)",zIndex:20}}>
+            <div style={{position:"fixed",bottom:60,left:"50%",transform:"translateX(-50%)",background:"rgba(8,8,22,0.96)",border:`1px solid ${RING_META[RINGS.findIndex(r=>r.some(e=>e.sym===hovered.sym))]?.color||"#fff"}30`,borderRadius:10,padding:"12px 20px",maxWidth:420,textAlign:"center",backdropFilter:"blur(14px)",zIndex:30,pointerEvents:"auto"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:5}}>
                 <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:30,fontWeight:700,color:FAMILIES[hovered.family].color}}>{hovered.sym}</span>
                 <div>
@@ -325,6 +380,8 @@ export default function ElementalCosmos() {
         </div>
         <div style={{textAlign:"center",padding:"4px 20px 10px",fontSize:8,color:"rgba(255,255,255,0.12)",letterSpacing:"0.12em"}}>Hover to preview · Click to explore · Press Esc to close</div>
       </div>
+
+      <Stars count={180} elements={ALL_ELEMENTS} />
     </div>
   );
 }
