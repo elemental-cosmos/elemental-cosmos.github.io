@@ -165,6 +165,35 @@ function Sidebar({ activeRing, onRingClick, open, onToggle }) {
   );
 }
 
+function Stars({ count = 200 }) {
+  const stars = useMemo(() => {
+    const s = [];
+    for (let i = 0; i < count; i++) {
+      s.push({
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 1.8 + 0.3,
+        opacity: Math.random() * 0.6 + 0.1,
+        delay: Math.random() * 5,
+      });
+    }
+    return s;
+  }, [count]);
+  return (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
+      {stars.map((s, i) => (
+        <div key={i} style={{
+          position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
+          width: s.size, height: s.size, borderRadius: "50%",
+          background: s.opacity > 0.5 ? "rgba(255,255,255,0.9)" : "rgba(200,210,255,0.7)",
+          opacity: s.opacity,
+          animation: `twinkle ${3 + s.delay}s ease-in-out ${s.delay}s infinite alternate`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
 export default function ElementalCosmos() {
   const [hovered,setHovered]=useState(null);
   const [selected,setSelected]=useState(null);
@@ -223,14 +252,17 @@ export default function ElementalCosmos() {
   return (
     <div ref={wrapRef} style={{width:"100%",height:"100vh",background:"radial-gradient(ellipse at 60% 50%,#0c0c22 0%,#060612 40%,#020208 100%)",fontFamily:"'JetBrains Mono',monospace",overflow:"hidden",position:"relative",display:"flex",flexDirection:"column"}}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-      <style>{`@keyframes panelIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}`}</style>
+      <style>{`@keyframes panelIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}@keyframes twinkle{0%{opacity:0.1;transform:scale(1)}100%{opacity:0.8;transform:scale(1.3)}}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}`}</style>
+
+      <Stars count={220} />
 
       <Sidebar activeRing={activeRing} onRingClick={handleRingClick} open={sidebarOpen} onToggle={()=>setSidebarOpen(p=>!p)}/>
 
-      <div style={{marginLeft:sidebarOpen?320:44,transition:"margin-left 0.4s cubic-bezier(.4,0,.2,1)",flex:1,display:"flex",flexDirection:"column",position:"relative"}}>
+      <div style={{marginLeft:sidebarOpen?320:44,transition:"margin-left 0.4s cubic-bezier(.4,0,.2,1)",flex:1,display:"flex",flexDirection:"column",position:"relative",zIndex:1}}>
         <div style={{textAlign:"center",padding:"14px 20px 0",flexShrink:0}}>
           <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(22px,3.5vw,40px)",fontWeight:700,color:"rgba(255,255,255,0.92)",margin:0,letterSpacing:"0.14em",textTransform:"uppercase"}}>The Elemental Cosmos</h1>
           <p style={{fontSize:10,color:"rgba(255,255,255,0.25)",letterSpacing:"0.3em",textTransform:"uppercase",margin:"3px 0 0"}}>40 Elements · 4 Rings · Arranged by proximity to human life</p>
+          <p style={{fontSize:12,color:"rgba(255,255,255,0.7)",margin:"8px 0 0",letterSpacing:"0.06em",fontFamily:"'Cormorant Garamond',serif",fontWeight:600}}>Jane-Rose Marwa &nbsp;·&nbsp; Armanique Newman &nbsp;·&nbsp; Rougy Rucogoza &nbsp;·&nbsp; Esere Ejumudo</p>
         </div>
 
         <div style={{display:"flex",justifyContent:"center",padding:"10px 20px 0",zIndex:50}}>
@@ -291,7 +323,7 @@ export default function ElementalCosmos() {
         <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"4px 10px",padding:"6px 20px 4px"}}>
           {RING_META.map((ring,i)=>(<button key={ring.id} onClick={()=>handleRingClick(i)} style={{display:"flex",alignItems:"center",gap:5,background:activeRing===i?`${ring.color}12`:"transparent",border:activeRing===i?`1px solid ${ring.color}30`:"1px solid transparent",borderRadius:4,padding:"3px 8px",cursor:"pointer",transition:"all 0.25s"}}><span style={{width:7,height:7,borderRadius:"50%",background:ring.color,boxShadow:activeRing===i?`0 0 10px ${ring.glow}`:"none",flexShrink:0}}/><span style={{fontSize:9,color:activeRing===i?ring.color:"rgba(255,255,255,0.3)",letterSpacing:"0.05em",whiteSpace:"nowrap"}}>{ring.name}</span><span style={{fontSize:8,color:"rgba(255,255,255,0.15)",fontFamily:"'JetBrains Mono',monospace"}}>{RINGS[i].length}</span></button>))}
         </div>
-        <div style={{textAlign:"center",padding:"2px 20px 10px",fontSize:8,color:"rgba(255,255,255,0.15)",letterSpacing:"0.12em"}}>Created by Jane-Rose Marwa · Armanique Newman · Rougy Rucogoza · Esere Ejumudo</div>
+        <div style={{textAlign:"center",padding:"4px 20px 10px",fontSize:8,color:"rgba(255,255,255,0.12)",letterSpacing:"0.12em"}}>Hover to preview · Click to explore · Press Esc to close</div>
       </div>
     </div>
   );
